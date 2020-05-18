@@ -1,0 +1,59 @@
+digraph {
+    label="What Cache-Control header do I need?"
+
+    start[shape="box", style=rounded,label="Start"];
+
+    // Decisions
+    caching_allowed[shape="diamond", style="", label="Should it ever\nbe cached?"];
+    shared_cache_allowed[shape="diamond", style="", label="Can it be\nshared?"];
+    shared_max_age_required[shape="diamond", style="", label="Different max-age\nfor shared?"];
+    cache_forever[shape="diamond", style="", label="Will it ever\nchange?"];
+    require_revalidation[shape="diamond", style="", label="Must check\nbefore using\ncached copy?"];
+    how_often[shape="diamond", style="", label="How often?"];
+
+    // Intermediate outputs
+    private[shape="box", label="private"];
+    public[shape="box", label="public"];
+    maxage[shape="box", label="max-age=<seconds>"];
+    s_maxage[shape="box" label="s-maxage=<seconds>"];
+    immutable[shape="box", label="immutable,\nmax-age=604800"];
+    no_cache[shape="box", label="no-cache"];
+    must_revalidate[shape="box", label="must-revalidate"];
+    etag[shape="box", label="Add ETag header"];
+    age[shape="box", label="Consider\nAge header"];
+
+    // Terminals
+    no_store[shape="box", style=rounded, label="no-store"];
+    done[shape="box", style=rounded, label="Done"];
+
+    start -> caching_allowed;
+    caching_allowed -> no_store [xlabel="No"];
+    caching_allowed -> cache_forever [xlabel="Yes"];
+    cache_forever -> how_often[xlabel="Yes"];
+    cache_forever -> immutable[xlabel="No"];
+
+    how_often -> no_cache[xlabel="Often"];
+    how_often -> maxage[xlabel="Periodically"];
+
+    maxage -> age;
+    age -> require_revalidation;
+    require_revalidation -> must_revalidate[xlabel="If stale"];
+    require_revalidation -> no_cache[xlabel="Always"];
+    require_revalidation -> shared_cache_allowed[xlabel="Never"];
+
+    must_revalidate -> etag;
+    no_cache -> etag;
+    etag -> shared_cache_allowed;
+    immutable -> shared_cache_allowed;
+
+    shared_cache_allowed -> private [xlabel="No"];
+    shared_cache_allowed -> public [xlabel="Yes"];
+
+    public -> shared_max_age_required;
+    shared_max_age_required -> s_maxage[xlabel="Yes"];
+
+    private -> done;
+    s_maxage -> done;
+    shared_max_age_required -> done[xlabel="No"];
+    
+}
