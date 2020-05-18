@@ -20,7 +20,6 @@ digraph {
     no_cache[shape="box", label="no-cache"];
     must_revalidate[shape="box", label="must-revalidate"];
     etag[shape="box", label="Add ETag header"];
-    age[shape="box", label="Consider\nAge header"];
 
     // Terminals
     no_store[shape="box", style=rounded, label="no-store"];
@@ -35,8 +34,7 @@ digraph {
     how_often -> no_cache[xlabel="Often"];
     how_often -> maxage[xlabel="Periodically"];
 
-    maxage -> age;
-    age -> require_revalidation;
+    maxage -> require_revalidation;
     require_revalidation -> must_revalidate[xlabel="If stale"];
     require_revalidation -> no_cache[xlabel="Always"];
     require_revalidation -> shared_cache_allowed[xlabel="Never"];
